@@ -1,9 +1,4 @@
-Short Description (under 350 characters)
-Civic engagement platform connecting citizens and city administrators to report, verify, and resolve local issues. Features role-based dashboards, AI-powered image verification, eco-rewards system, and transparent issue tracking for community-driven urban improvement.
-Character count: 287
-
-Full Professional README
-markdown# CityConnect
+# CityConnect
 
 A civic engagement platform for citizens and city administrators to collaboratively report, verify, and resolve local issues with gamified rewards and transparent tracking.
 
