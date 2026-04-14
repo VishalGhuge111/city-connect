@@ -1,132 +1,173 @@
-Alright — if we want free / free-trial AI verification and don’t want to create a separate microservice API for it, we can:
+Short Description (under 350 characters)
+Civic engagement platform connecting citizens and city administrators to report, verify, and resolve local issues. Features role-based dashboards, AI-powered image verification, eco-rewards system, and transparent issue tracking for community-driven urban improvement.
+Character count: 287
 
-Use OpenAI Vision API — free tier available if you have new credits (good for hackathon MVP).
+Full Professional README
+markdown# CityConnect
 
-Or Hugging Face Inference API — free tier, can call waste-detection models without training.
+A civic engagement platform for citizens and city administrators to collaboratively report, verify, and resolve local issues with gamified rewards and transparent tracking.
 
-Or Roboflow Hosted Models — free plan (200 free credits/month) with YOLO models.
+## Overview
 
-We’ll structure prompts so you can swap between them easily.
-Here’s the updated, final prompt sequence for your Django MVP.
+CityConnect bridges the gap between citizens and municipal departments by providing a structured system for reporting civic issues like potholes, waste management, and infrastructure problems. The platform combines AI-powered verification, department-specific workflows, and a reward system to encourage community participation.
 
-Prompt 1 — Project bootstrap
-Ask:
+Built during a hackathon and refined for production readiness.
 
-Act as a senior Django dev. Create commands and a minimal README to bootstrap a new Django project called cityconnect_mvp and an app called issues. Include:
+## Key Features
 
-recommended pip install commands (django, djangorestframework, pillow, exifread, geopy, requests, python-dotenv, plus openai or huggingface_hub depending on AI choice),
+**For Citizens:**
+- Report issues with photos, location, and descriptions
+- Complete eco-friendly tasks to earn rewards
+- Track issue resolution status in real-time
+- Redeem eco-coins for vouchers and event tickets
+- Compete on community leaderboard
 
-settings.py additions for MEDIA and REST_FRAMEWORK,
+**For Administrators:**
+- Department-specific dashboards for issue management
+- AI-assisted image verification (OpenAI/Hugging Face)
+- Post city news and announcements
+- Track department performance metrics
+- Approve or reject submitted reports
 
-.env variables (SECRET_KEY, OPENAI_API_KEY or HF_API_KEY, optional GOOGLE_MAPS_API_KEY),
+**Platform Capabilities:**
+- Role-based access control (citizen/admin)
+- Automated image verification system
+- Geolocation-based issue tracking
+- Gamification with badges and leaderboard
+- Mobile-responsive design
 
-exact command sequence to run migrations and startserver.
+## Tech Stack
 
-Prompt 2 — Models
-Ask:
+- **Backend:** Django (Python)
+- **Frontend:** Django Templates, HTML5, CSS3, JavaScript
+- **Database:** SQLite (PostgreSQL-ready)
+- **AI Integration:** OpenAI API, Hugging Face Inference API
+- **Image Processing:** Pillow
+- **Geolocation:** Geopy
 
-Create Django models for issues app:
+## Project Structure
+```
+city-connect-main/
+├── admin_panel/      # Department admin dashboards
+├── cityconnect/      # Project settings and root URLs
+├── core/             # User, news, badges, main views
+├── issues/           # Issue/task reporting, AI verification
+├── store/            # Store offers, redemptions
+├── static/           # Static files (CSS, JS, images)
+├── styles/           # Global styles
+├── templates/        # HTML templates (per app)
+├── requirements.txt  # Python dependencies
+├── manage.py         # Django management script
+└── ...
+```
 
-user (optional FK to AUTH_USER_MODEL),
+## Setup
 
-title (char),
+**Prerequisites:**
+- Python 3.8+
+- pip
+- Virtual environment (recommended)
 
-description (text),
+**Installation:**
 
-image (ImageField),
+```bash
+# Clone repository
+git clone https://github.com/VishalGhuge111/city-connect.git
+cd city-connect
 
-reported_latitude & reported_longitude (decimal),
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-exif_latitude & exif_longitude (nullable decimal),
+# Install dependencies
+pip install -r requirements.txt
 
-is_verified (nullable boolean),
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings
 
-verification_method (char choices: 'openai', 'huggingface', 'roboflow', 'manual'),
+# Setup database
+python manage.py migrate
+python manage.py createsuperuser
 
-verification_score (float, null),
+# Run development server
+python manage.py runserver
+```
 
-verification_details (JSONField or TextField),
+**Environment Variables:**
 
-timestamps.
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+OPENAI_API_KEY=your-key  # Optional
+HF_API_KEY=your-key      # Optional
+```
 
-Add model method extract_exif_and_save() to read EXIF GPS using Pillow or exifread. Provide migrations.
+## Usage
 
-Prompt 3 — Report form (camera + GPS capture)
-Ask:
+**Access Points:**
+- Main application: `http://localhost:8000/`
+- Admin panel: `http://localhost:8000/admin/`
+- Department dashboard: `http://localhost:8000/admin_panel/`
 
-Generate report_create.html template and Django view:
+**User Flows:**
+1. Citizens register and submit issue reports with images
+2. AI verification system processes submitted images
+3. Department admins review and manage issues
+4. Citizens earn eco-coins for verified actions
+5. Rewards redeemed through integrated store
 
-Form fields: title, description, camera file input (accept="image/*" capture="environment"), hidden lat/lon inputs.
+## Core Components
 
-JavaScript: get GPS coords before submit, fill hidden inputs, submit.
+### Issues System
+Handles civic issue reporting, categorization, and tracking through resolution. Includes automated AI verification for submitted images.
 
-View: save form, call extract_exif_and_save() after save.
+### Admin Panel
+Department-specific dashboards for managing assigned issues, posting announcements, and tracking resolution metrics.
 
-Fallback UI if GPS denied.
+### Rewards Store
+Eco-coin economy where citizens redeem earned points for vouchers, discounts, and event access.
 
-Prompt 4 — EXIF & location compare
-Ask:
+### User Profiles
+Role-based access with citizen and admin views, activity tracking, and leaderboard integration.
 
-Create utils/location_tools.py:
+## AI Verification
 
-extract_gps_from_image(image_path) → (lat, lon) or None
+The platform includes optional AI-powered image verification:
+- Validates submitted images match reported issue types
+- Uses OpenAI or Hugging Face APIs
+- Provides confidence scores for admin review
+- Designed for MVP/demo; requires hardening for production
 
-haversine_distance(lat1, lon1, lat2, lon2) → meters
+## Development
 
-verify_location_against_exif(reported_lat, reported_lon, exif_lat, exif_lon) → dict with match True/False, distance.
+**Create demo data:**
+```bash
+python manage.py create_demo_issues
+```
 
-Prompt 5 — AI image verification (OpenAI + free alternative)
-Ask:
+**Run tests:**
+```bash
+python manage.py test
+```
 
-Create verifier/image_verifier.py with:
+## Deployment Considerations
 
-verify_with_openai(image_path, prompt="Does this image show a civic issue like garbage or pothole?") — returns dict {yes_no, confidence, explanation}
+- Configure production database (PostgreSQL recommended)
+- Set up media file storage (S3, Cloudinary, etc.)
+- Secure API keys in environment variables
+- Enable HTTPS for production
+- Configure allowed hosts and CORS
+- Set DEBUG=False in production
 
-verify_with_huggingface(image_path, model_id="mohammadamireshraghi/garbage-detection") — calls Hugging Face Inference API (free tier) for object detection, checks if garbage/pothole found.
+## Contributing
 
-Both functions should update IssueReport with is_verified, verification_method, verification_score, verification_details.
+Contributions welcome. Please open an issue before submitting major changes.
 
-Prompt 6 — Verification pipeline
-Ask:
+## License
 
-Create Django function run_verification(issue_id) that:
+MIT License - see LICENSE file for details.
 
-Extracts EXIF coords & compares to reported coords.
+---
 
-Runs AI image verification (OpenAI first, fallback to Hugging Face if no API key or fail).
-
-Combines results: is_verified=True only if image shows civic issue and location plausible.
-
-Saves details JSON.
-Provide example of calling it after form save.
-
-Prompt 7 — Reverse geocode
-Ask:
-
-Create reverse_geocode(lat, lon) using geopy.Nominatim (free) to get address. Return address string. Also add plausibility_check(reported_lat, reported_lon, exif_lat, exif_lon) to confirm if within 50 meters.
-
-Prompt 8 — API endpoint for verification
-Ask:
-
-Create DRF endpoint /api/reports/<id>/verify/ that runs run_verification(issue_id) and returns JSON {is_verified, score, details}.
-
-Prompt 9 — Admin customization
-Ask:
-
-Customize IssueReport admin: show title, is_verified, method, score; filter by status; add actions force_verify, mark_needs_review.
-
-Prompt 10 — Demo seed command
-Ask:
-
-Management command create_demo_issues that seeds a few reports with sample images.
-
-Prompt 11 — Tests
-Ask:
-
-Add tests for EXIF extraction, haversine, AI verifier (mocked), and full verification pipeline.
-
-Prompt 12 — Deployment checklist
-Ask:
-
-Provide checklist for deploying Django with media storage and using AI API keys securely for hackathon demo.
-
+**Status:** Active development • Originally built for hackathon • Documented for production use
